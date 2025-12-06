@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Appunti</title>
+<!-- Icona della scheda browser -->
+<link rel="icon" href="icon.jpg" type="image/jpeg">
+<!-- iOS -->
+<link rel="apple-touch-icon" href="icon.jpg">
+
+<!-- Android / Chrome -->
+<link rel="manifest" href="manifest.json">
+
+<style>
+/* ----------------- GENERALE ----------------- */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto;
+    background-color: #f9f7f1;
+    background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+    background-repeat: repeat;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.3s ease;
+    flex-direction: column;
+}
+
+/* --- SCREEN BOX --- */
+.screen-box {
+    background: rgba(255,255,255,0.85);
+    padding: 32px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+}
+.hidden { display: none; }
+.screen-enter { opacity: 0; transform: translateY(40px); }
+.screen-enter-active { opacity: 1; transform: translateY(0); transition: opacity .4s ease, transform .4s ease; }
+.screen-exit { opacity: 1; transform: translateY(0); }
+.screen-exit-active { opacity: 0; transform: translateY(-40px); transition: opacity .4s ease, transform .4s ease; }
+
+h2 { margin: 0; text-align: center; font-size: 1.8rem; color: #333; }
+
+.input-field { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.input-field input, .input-field select { padding: 12px; font-size: 1rem; border: 1px solid #ccc; border-radius: 10px; width: 100%; }
+
+.btn { padding: 12px; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; background-color: #333; color: white; transition: background 0.2s; width: 100%; }
+.btn:hover { background-color: #555; }
+
+.register-link { text-align: center; font-size: 0.95rem; width: 100%; }
+.register-link a { color: #333; font-weight: bold; text-decoration: none; cursor: pointer; }
+
+.google-login-btn { display: flex; align-items: center; justify-content: center; gap: 10px; background: #ffffff; border: 1px solid #dadce0; border-radius: 10px; padding: 12px; cursor: pointer; transition: background 0.2s; width: 100%; }
+.google-login-btn:hover { background: #f7f8f8; }
+.google-login-btn img { width: 24px; height: 24px; }
+.google-login-btn span { color: #000000; font-size: 1rem; font-weight: 500; }
+
+.error-msg { font-size: 0.85rem; color: #d80000; margin-top: -6px; display: none; }
+
+/* ----------------- MAIN APP ----------------- */
+.app-container {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    gap: 24px;
+}
+
+.main-title { font-size: 2.2rem; font-weight: 700; color: #222; margin: 0; text-align: center; }
+
+.cards-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    justify-items: center;
+}
+
+.card {
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.card-img { width: 100%; height: 130px; object-fit: cover; }
+
+.card-footer {
+    width: 100%;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    text-align: center;
+    padding: 12px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    position: absolute;
+    bottom: 0;
+}
+
+.bottom-bar {
+    margin-top: 10px;
+    width: 100%;
+    max-width: 420px;
+    background: #2e2d2b;
+    padding: 14px 0;
+    border-radius: 14px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center; /* centra verticalmente tutte le icone */
+}
+
+.bb-icon {
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    opacity: 0.9;
+    fill: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px; /* uniforma il button ⚙️ con le altre icone */
+    background: none;
+    border: none;
+    color: white;
+    padding: 0;
+    line-height: 1;
+}
+
+.bb-icon:hover { opacity: 1; }
+
+/* ----------------- SETTINGS SCREEN ----------------- */
+#settings-screen select { cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen" class="screen-box">
+    <h2>Accedi</h2>
+    <div class="input-field">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="Inserisci la tua email">
+        <div class="error-msg" id="login-email-error"></div>
+    </div>
+    <div class="input-field">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="Inserisci la password">
+        <div class="error-msg" id="login-password-error"></div>
+    </div>
+    <button class="btn">Accedi</button>
+    <div id="google-btn" class="google-login-btn">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg">
+        <span>Accedi con Google</span>
+    </div>
+    <div class="register-link">Sei nuovo? <a id="go-to-register">Registrati</a></div>
+</div>
+
+<!-- REGISTER -->
+<div id="register-screen" class="screen-box hidden">
+    <h2>Registrati</h2>
+    <div class="input-field">
+        <label>Email</label>
+        <input type="email" id="register-email" placeholder="Inserisci la tua email">
+        <div class="error-msg" id="register-email-error"></div>
+    </div>
+    <div class="input-field">
+        <label>Password</label>
+        <input type="password" id="register-password" placeholder="Crea una password">
+        <div class="error-msg" id="register-password-error"></div>
+    </div>
+    <button class="btn">Crea Account</button>
+    <div class="register-link">Hai già un account? <a id="back-to-login">Accedi</a></div>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app" class="screen-box hidden">
+    <div class="app-container">
+        <h1 class="main-title">Appunti</h1>
+        <div class="cards-grid">
+            <div class="card"><img src="appunti.jpg" class="card-img"><div class="card-footer">I MIEI APPUNTI</div></div>
+            <div class="card"><img src="idee.jpg" class="card-img"><div class="card-footer">IDEE</div></div>
+            <div class="card"><img src="listacosedafare.jpg" class="card-img"><div class="card-footer">LISTA COSE DA FARE</div></div>
+            <div class="card"><img src="altro.jpg" class="card-img"><div class="card-footer">ALTRO</div></div>
+        </div>
+        <div class="bottom-bar">
+            <button id="settings-icon" class="bb-icon" style="font-size:28px; background:none; border:none; color:white; cursor:pointer;">⚙️</button>
+            <svg class="bb-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" onclick="alert('Home cliccata')">
+                <path d="M32 12 L12 32 H16 V56 H48 V32 H52 L32 12 Z M28 42 H36 V56 H28 V42 Z M20 36 H28 V44 H20 V36 Z M36 36 H44 V44 H36 V36 Z"/>
+            </svg>
+            <svg class="bb-icon" viewBox="0 0 24 24" onclick="alert('Info cliccata')">
+                <path d="M12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10-10-4.48-10-10 4.48-10 10-10zm0 9h-1v6h2v-6h-1zm0-4h-1v2h2v-2h-1z"/>
+            </svg>
+            <svg class="bb-icon" viewBox="0 0 24 24" onclick="alert('Menu cliccato')">
+                <path d="M3 6h18v2H3zM3 11h18v2H3zM3 16h18v2H3z"/>
+            </svg>
+        </div>
+    </div>
+</div>
+
+<!-- SETTINGS SCREEN -->
+<div id="settings-screen" class="screen-box hidden">
+    <h2>Impostazioni</h2>
+    <div class="input-field">
+        <label>Email</label>
+        <input type="email" id="settings-email" disabled>
+    </div>
+    <div class="input-field">
+        <label>Password</label>
+        <input type="password" id="settings-password">
+        <div class="error-msg" id="settings-password-error"></div>
+    </div>
+    <button class="btn" id="update-password-btn">Aggiorna Password</button>
+    <div class="input-field">
+        <label>Lingua</label>
+        <select id="settings-language">
+            <option value="it">Italiano</option>
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="es">Español</option>
+            <option value="de">Deutsch</option>
+        </select>
+    </div>
+    <div class="input-field">
+        <label>Tema</label>
+        <select id="settings-theme">
+            <option value="light">Chiaro</option>
+            <option value="dark">Scuro</option>
+        </select>
+    </div>
+    <button class="btn" id="back-to-app">Torna all'App</button>
+</div>
+
+<script>
+// ---------- VARIABILI GLOBALI ----------
+let currentUser = null;
+
+const loginScreen = document.getElementById("login-screen");
+const registerScreen = document.getElementById("register-screen");
+const mainApp = document.getElementById("main-app");
+const settingsScreen = document.getElementById("settings-screen");
+
+const goToRegister = document.getElementById("go-to-register");
+const backToLogin = document.getElementById("back-to-login");
+
+const settingsIcon = document.getElementById("settings-icon");
+const updatePasswordBtn = document.getElementById("update-password-btn");
+const backToAppBtn = document.getElementById("back-to-app");
+const settingsEmailInput = document.getElementById("settings-email");
+const settingsPasswordInput = document.getElementById("settings-password");
+const settingsPasswordError = document.getElementById("settings-password-error");
+const settingsLanguage = document.getElementById("settings-language");
+const settingsTheme = document.getElementById("settings-theme");
+
+// ---------- TRADUZIONI ----------
+const translations = {
+    it: {
+        mainTitle: "Appunti",
+        cards: ["I MIEI APPUNTI", "IDEE", "LISTA COSE DA FARE", "ALTRO"],
+        loginTitle: "Accedi",
+        registerTitle: "Registrati",
+        email: "Email",
+        password: "Password",
+        loginBtn: "Accedi",
+        registerBtn: "Crea Account",
+        settingsTitle: "Impostazioni",
+        updatePasswordBtn: "Aggiorna Password",
+        backToAppBtn: "Torna all'App",
+        newAccount: "Sei nuovo?",
+        alreadyAccount: "Hai già un account?"
+    },
+    en: {
+        mainTitle: "Notes",
+        cards: ["MY NOTES", "IDEAS", "TO-DO LIST", "OTHER"],
+        loginTitle: "Login",
+        registerTitle: "Register",
+        email: "Email",
+        password: "Password",
+        loginBtn: "Login",
+        registerBtn: "Create Account",
+        settingsTitle: "Settings",
+        updatePasswordBtn: "Update Password",
+        backToAppBtn: "Back to App",
+        newAccount: "New here?",
+        alreadyAccount: "Already have an account?"
+    },
+    fr: {
+        mainTitle: "Notes",
+        cards: ["MES NOTES", "IDÉES", "LISTE DE CHOSES À FAIRE", "AUTRE"],
+        loginTitle: "Connexion",
+        registerTitle: "S'inscrire",
+        email: "Email",
+        password: "Mot de passe",
+        loginBtn: "Connexion",
+        registerBtn: "Créer un compte",
+        settingsTitle: "Paramètres",
+        updatePasswordBtn: "Mettre à jour le mot de passe",
+        backToAppBtn: "Retour à l'application",
+        newAccount: "Nouveau ici?",
+        alreadyAccount: "Vous avez déjà un compte?"
+    },
+ es: {
+        mainTitle: "Notas",
+        cards: ["MIS NOTAS", "IDEAS", "LISTA DE TAREAS", "OTRO"],
+        loginTitle: "Iniciar sesión",
+        registerTitle: "Registrarse",
+        email: "Correo electrónico",
+        password: "Contraseña",
+        loginBtn: "Iniciar sesión",
+        registerBtn: "Crear cuenta",
+        settingsTitle: "Configuración",
+        updatePasswordBtn: "Actualizar contraseña",
+        backToAppBtn: "Volver a la App",
+        newAccount: "¿Nuevo aquí?",
+        alreadyAccount: "¿Ya tienes cuenta?"
+    },
+    de: {
+        mainTitle: "Notizen",
+        cards: ["MEINE NOTIZEN", "IDEEN", "AUFGABENLISTE", "ANDERES"],
+        loginTitle: "Anmelden",
+        registerTitle: "Registrieren",
+        email: "E-Mail",
+        password: "Passwort",
+        loginBtn: "Anmelden",
+        registerBtn: "Konto erstellen",
+        settingsTitle: "Einstellungen",
+        updatePasswordBtn: "Passwort aktualisieren",
+        backToAppBtn: "Zur App zurück",
+        newAccount: "Neu hier?",
+        alreadyAccount: "Schon ein Konto?"
+    }
+};
+
+// ---------- SCREEN SWITCH ----------
+function switchScreens(from, to) {
+    from.classList.add("screen-exit");
+    setTimeout(()=> {
+        from.classList.add("screen-exit-active");
+        setTimeout(()=> {
+            from.classList.add("hidden");
+            from.classList.remove("screen-exit","screen-exit-active");
+
+            to.classList.remove("hidden");
+            to.classList.add("screen-enter");
+            setTimeout(()=>to.classList.add("screen-enter-active"),20);
+            setTimeout(()=>to.classList.remove("screen-enter","screen-enter-active"),400);
+        },10);
+    },10);
+}
+
+goToRegister.addEventListener("click", () => switchScreens(loginScreen, registerScreen));
+backToLogin.addEventListener("click", () => switchScreens(registerScreen, loginScreen));
+
+// ---------- VALIDAZIONE ----------
+function validateEmail(email, errorEl){
+    if(!email.endsWith("@gmail.com")){
+        errorEl.textContent = "Email non valida (usa @gmail.com)";
+        errorEl.style.display = "block";
+        return false;
+    }
+    errorEl.style.display = "none";
+    return true;
+}
+
+function validatePassword(password, errorEl){
+    const regex=/^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).{12,}$/;
+    if(!regex.test(password)){
+        errorEl.textContent="Password almeno 12 caratteri, una maiuscola e un simbolo";
+        errorEl.style.display="block";
+        return false;
+    }
+    errorEl.style.display="none";
+    return true;
+}
+
+// ---------- LOCAL STORAGE ----------
+function saveAccount(email,password,data={}) {
+    const account={email,password,data};
+    localStorage.setItem("account_"+email,JSON.stringify(account));
+}
+
+function loadAccount(email) {
+    const acc=localStorage.getItem("account_"+email);
+    return acc?JSON.parse(acc):null;
+}
+
+// ---------- LOGIN ----------
+document.querySelector("#login-screen .btn").addEventListener("click", ()=> {
+    const email=document.getElementById("login-email").value;
+    const password=document.getElementById("login-password").value;
+    const emailError=document.getElementById("login-email-error");
+    const passwordError=document.getElementById("login-password-error");
+
+    if(!validateEmail(email,emailError) || !validatePassword(password,passwordError)) return;
+
+    const acc=loadAccount(email);
+    if(acc && acc.password===password){
+        currentUser=acc;
+        localStorage.setItem("currentUser", email);
+        showMainApp();
+    } else{
+        passwordError.textContent="Credenziali non valide";
+        passwordError.style.display="block";
+    }
+});
+
+// ---------- REGISTRAZIONE ----------
+document.querySelector("#register-screen .btn").addEventListener("click", ()=> {
+    const email=document.getElementById("register-email").value;
+    const password=document.getElementById("register-password").value;
+    const emailError=document.getElementById("register-email-error");
+    const passwordError=document.getElementById("register-password-error");
+
+    if(!validateEmail(email,emailError) || !validatePassword(password,passwordError)) return;
+
+    saveAccount(email,password,{});
+    currentUser=loadAccount(email);
+    localStorage.setItem("currentUser", email);
+    alert("Account creato!");
+    showMainApp();
+});
+
+// ---------- MOSTRA MAIN APP ----------
+function showMainApp(){
+    const visibleScreen = document.querySelector(".screen-box:not(.hidden)");
+    if(visibleScreen) switchScreens(visibleScreen, mainApp);
+
+    // applica tema salvato
+    const theme = localStorage.getItem("theme") || "light";
+    document.body.style.backgroundColor = theme==="dark" ? "#1e1e1e" : "#f9f7f1";
+
+    // applica lingua salvata
+    const lang = localStorage.getItem("lang") || "it";
+    settingsLanguage.value = lang;
+    applyLanguage(lang);
+}
+
+// ---------- AUTO LOGIN ----------
+window.addEventListener("load", ()=> {
+    const savedUser = localStorage.getItem("currentUser");
+    if(savedUser){
+        const acc = loadAccount(savedUser);
+        if(acc){
+            currentUser = acc;
+            showMainApp();
+        }
+    }
+});
+
+// ---------- FUNZIONE APPLICAZIONE LINGUA ----------
+function applyLanguage(lang){
+    const t = translations[lang] || translations.it;
+
+    // Main app
+    document.querySelector(".main-title").textContent = t.mainTitle;
+    document.querySelectorAll(".card-footer").forEach((el,i)=> el.textContent = t.cards[i]);
+
+    // Login
+    document.querySelector("#login-screen h2").textContent = t.loginTitle;
+    document.querySelector("#login-screen .btn").textContent = t.loginBtn;
+    document.querySelector("#login-screen .register-link").innerHTML = `${t.newAccount} <a id="go-to-register">Registrati</a>`;
+
+    // Register
+    document.querySelector("#register-screen h2").textContent = t.registerTitle;
+    document.querySelector("#register-screen .btn").textContent = t.registerBtn;
+    document.querySelector("#register-screen .register-link").innerHTML = `${t.alreadyAccount} <a id="back-to-login">Accedi</a>`;
+
+    // Settings
+    document.querySelector("#settings-screen h2").textContent = t.settingsTitle;
+    updatePasswordBtn.textContent = t.updatePasswordBtn;
+    backToAppBtn.textContent = t.backToAppBtn;
+}
+
+// ---------- FUNZIONE APERTURA IMPOSTAZIONI ----------
+function openSettings(){
+    if(!currentUser) return;
+    settingsEmailInput.value = currentUser.email;
+    settingsPasswordInput.value = currentUser.password || "";
+    settingsLanguage.value = localStorage.getItem("lang") || "it";
+    settingsTheme.value = localStorage.getItem("theme") || "light";
+    document.body.style.backgroundColor = settingsTheme.value === "dark" ? "#1e1e1e" : "#f9f7f1";
+
+    switchScreens(mainApp, settingsScreen);
+}
+
+// ---------- CLICK IMPOSTAZIONI ----------
+settingsIcon.addEventListener("click", openSettings);
+
+// ---------- BACK TO APP ----------
+backToAppBtn.addEventListener("click", () => switchScreens(settingsScreen, mainApp));
+
+// ---------- UPDATE PASSWORD ----------
+updatePasswordBtn.addEventListener("click", () => {
+    const pwd = settingsPasswordInput.value;
+    if(!validatePassword(pwd, settingsPasswordError)) return;
+    currentUser.password = pwd;
+    saveAccount(currentUser.email, pwd, currentUser.data);
+    localStorage.setItem("currentUser", currentUser.email);
+    alert("Password aggiornata!");
+});
+
+// ---------- CAMBIO LINGUA ----------
+settingsLanguage.addEventListener("change", () => {
+    const lang = settingsLanguage.value;
+    localStorage.setItem("lang", lang);
+    applyLanguage(lang);
+});
+
+// ---------- CAMBIO TEMA ----------
+settingsTheme.addEventListener("change", () => {
+    localStorage.setItem("theme", settingsTheme.value);
+    document.body.style.backgroundColor = settingsTheme.value === "dark" ? "#1e1e1e" : "#f9f7f1";
+});
+</script>
+
+</body>
+</html>
