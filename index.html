@@ -467,6 +467,20 @@ function showMainApp(){
     settingsLanguage.value = lang;
     applyLanguage(lang);
 }
+// ---------- APRI SCHERMATA I MIEI APPUNTI ----------
+document.querySelectorAll(".cards-grid .card").forEach(card => {
+    card.addEventListener("click", () => {
+        const text = card.querySelector(".card-footer").textContent;
+        if(text === "I MIEI APPUNTI" || text === translations[localStorage.getItem("lang") || "it"].cards[0]){
+            switchScreens(mainApp, document.getElementById("notes-screen"));
+        }
+    });
+});
+
+// ---------- TORNA ALLA MAIN APP DALLA SCHERMATA NOTE ----------
+document.getElementById("back-to-main-from-notes").addEventListener("click", () => {
+    switchScreens(document.getElementById("notes-screen"), mainApp);
+});
 
 // ---------- AUTO LOGIN ----------
 window.addEventListener("load", ()=> {
@@ -548,3 +562,4 @@ settingsTheme.addEventListener("change", () => {
 
 </body>
 </html>      
+
